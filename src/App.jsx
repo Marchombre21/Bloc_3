@@ -10,40 +10,57 @@ function App () {
   const [markers, setMarkers] = useState([])
   const [radius, setRadius] = useState('3000')
 
-  const getRestaurants = async () => {
-    const restaurants = await fetch(
-      `/api.php?radius=${radius}&position1=${position[0]}&position2=${position[1]}`
-    )
-    if (!restaurants.ok) {
-      throw new Error('Ville introuvable!')
-    } else {
-      const response = await restaurants.json()
-      const restaurantsList = response.elements
-      const markersList = restaurantsList.map(restaurant => {
-        const lat = restaurant['lat']
-          ? restaurant['lat']
-          : restaurant['center']['lat']
-        const long = restaurant['lon']
-          ? restaurant['lon']
-          : restaurant['center']['lon']
-        return <Marker key={restaurant.id} position={[lat, long]}></Marker>
-      })
-      setMarkers(markersList)
-    }
-  }
-
   useEffect(() => {
+    const abortController = new AbortController()
+
+    const getRestaurants = async () => {
+      try {
+        const restaurants = await fetch(
+          `/api.php?radius=${radius}&position1=${position[0]}&position2=${position[1]}`,
+          {
+            signal: abortController.signal
+          }
+        )
+        if (!restaurants.ok) {
+          throw new Error('Ville introuvable!')
+        } else {
+          const response = await restaurants.json()
+          const restaurantsList = response.elements
+          const markersList = restaurantsList.map(restaurant => {
+            const lat = restaurant['lat']
+              ? restaurant['lat']
+              : restaurant['center']['lat']
+            const long = restaurant['lon']
+              ? restaurant['lon']
+              : restaurant['center']['lon']
+            return <Marker key={restaurant.id} position={[lat, long]}></Marker>
+          })
+          setMarkers(markersList)
+        }
+      } catch (err) {
+        if (err.name === 'AbortError') {
+          console.log("Requête annulée.");
+        } else {
+          console.error(err)
+        }
+      }
+    }
+
     getRestaurants()
-  }, [radius])
+
+    return () => {
+      abortController.abort()
+    }
+  }, [radius, position])
 
   return (
     <>
-      <SearchBar
-        action={setPosition}
-        action2={setMarkers}
-        action3={setRadius}
-        radius={radius}
-      ></SearchBar>
+<SearchBar
+  onPositionChange={setPosition}
+  onMarkersChange={setMarkers}
+  onRadiusChange={setRadius}
+   radius={radius}
+ ></SearchBar>
       <MapContainer
         className='leaflet-container'
         center={position}
@@ -54,10 +71,7 @@ function App () {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
         />
-        <MapController
-          position={position}
-          action={() => getRestaurants()}
-        ></MapController>
+        <MapController position={position}></MapController>
         {markers}
       </MapContainer>
     </>
