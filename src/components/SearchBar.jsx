@@ -1,10 +1,11 @@
 import React, { useRef, useState } from 'react'
 import { FaSearchLocation } from 'react-icons/fa'
 import CityButtons from './CityButtons'
+import { ClipLoader } from 'react-spinners'
 
 const SearchBar = ({
   onPositionChange,
-  onMarkersChange,
+  isLoading,
   onRadiusChange,
   radius
 }) => {
@@ -27,11 +28,10 @@ const SearchBar = ({
     const lat = locationResults.lat
     const lon = locationResults.lon
     onPositionChange([lat, lon])
-    onMarkersChange([])
   }
 
   const getResults = list => {
-    const results = list.map((result, index) => {
+    const resultsList = list.map((result, index) => {
       const postcode = result.address.postcode ?? ''
       const addressType = result.addresstype
       const addressParts = [
@@ -49,11 +49,11 @@ const SearchBar = ({
           county={result.address.county}
           CP={postcode}
           country={result.address.country}
-          action={e => flyTo(result, dataName)}
+          action={() => flyTo(result, dataName)}
         ></CityButtons>
       )
     })
-    setResults(results)
+    setResults(resultsList)
   }
 
   return (
@@ -70,6 +70,7 @@ const SearchBar = ({
         <button onClick={() => getList(inputValue)} type='button'>
           <FaSearchLocation></FaSearchLocation>
         </button>
+        <ClipLoader loading={isLoading} size={25}/>
       </section>
       <section>
         <label htmlFor='radius'>Zone de recherche: </label>

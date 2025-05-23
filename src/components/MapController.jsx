@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useMap } from 'react-leaflet'
 
 const MapController = ({ position }) => {
@@ -7,6 +7,8 @@ const MapController = ({ position }) => {
   useEffect(() => {
     map.flyTo(position, map.getZoom());
   }, [position])
+    
+  
   return null;//Apparemment il faut qu'un composant retourne soit du jsx, soit null.
 }
 
