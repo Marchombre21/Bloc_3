@@ -2,7 +2,12 @@ import React, { useRef, useState } from 'react'
 import { FaSearchLocation } from 'react-icons/fa'
 import CityButtons from './CityButtons'
 
-const SearchBar = ({ action, action2, action3, radius }) => {
+const SearchBar = ({
+  onPositionChange,
+  onMarkersChange,
+  onRadiusChange,
+  radius
+}) => {
   const [inputValue, setInputValue] = useState('')
   const [results, setResults] = useState([])
 
@@ -16,23 +21,27 @@ const SearchBar = ({ action, action2, action3, radius }) => {
     }
   }
 
-  const flyTo = (chosenCity, dataName) => {
-    setResults([]);
-    setInputValue(dataName);
-    const lat = chosenCity.lat
-    const lon = chosenCity.lon
-    action([lat, lon])
-    action2([])
+  const flyTo = (locationResults, dataName) => {
+    setResults([])
+    setInputValue(dataName)
+    const lat = locationResults.lat
+    const lon = locationResults.lon
+    onPositionChange([lat, lon])
+    onMarkersChange([])
   }
 
   const getResults = list => {
     const results = list.map((result, index) => {
       const postcode = result.address.postcode ?? ''
       const addressType = result.addresstype
-      let dataName = result.address[addressType];
-      dataName += ", " + postcode;
-      dataName += " " + result.address.county;
-      dataName += " " + result.address.country;
+      const addressParts = [
+        result.address[addressType],
+        postcode,
+        result.address.county,
+        result.address.country
+      ].filter(Boolean)
+      const dataName = addressParts.join(', ')
+
       return (
         <CityButtons
           key={index}
@@ -40,7 +49,7 @@ const SearchBar = ({ action, action2, action3, radius }) => {
           county={result.address.county}
           CP={postcode}
           country={result.address.country}
-          action={(e) => flyTo(result, dataName)}
+          action={e => flyTo(result, dataName)}
         ></CityButtons>
       )
     })
@@ -63,12 +72,17 @@ const SearchBar = ({ action, action2, action3, radius }) => {
         </button>
       </section>
       <section>
-        <label htmlFor="radius">Zone de recherche: </label>
-        <select name="radius" id="radius" value={radius} onChange={(e) => action3(e.target.value)}>
-          <option value="1000">1 km</option>
-          <option value="3000">3 km</option>
-          <option value="5000">5 km</option>
-          <option value="10000">10 km</option>
+        <label htmlFor='radius'>Zone de recherche: </label>
+        <select
+          name='radius'
+          id='radius'
+          value={radius}
+          onChange={e => onRadiusChange(e.target.value)}
+        >
+          <option value='1000'>1 km</option>
+          <option value='3000'>3 km</option>
+          <option value='5000'>5 km</option>
+          <option value='10000'>10 km</option>
         </select>
       </section>
       <section>{results}</section>
