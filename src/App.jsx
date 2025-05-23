@@ -20,7 +20,7 @@ function App () {
 
     const getRestaurants = async () => {
       try {
-        setIsLoading(true);
+        setIsLoading(true)
         const restaurants = await fetch(
           `/api.php?radius=${radius}&position1=${position[0]}&position2=${position[1]}`,
           {
@@ -43,16 +43,16 @@ function App () {
         }
       } catch (err) {
         if (err.name === 'AbortError') {
-          console.log('Requête annulée.')
         } else {
           console.error(err)
+          setIsLoading(false)
         }
       }
     }
 
     getRestaurants()
-    setTitle("Aucun restaurant sélectionné")
-    setAddress("")
+    setTitle('Aucun restaurant sélectionné')
+    setAddress('')
     return () => {
       abortController.abort()
     }
@@ -65,6 +65,9 @@ function App () {
         throw new Error('Restaurant introuvable')
       } else {
         const data = await response.json()
+        if (!data.address) {
+          throw new Error('Invalid address data')
+        }
         const realAddress = [
           data.address.amenity,
           data.address.road,
@@ -116,7 +119,8 @@ function App () {
             >
               <Popup>
                 <div id='popupContent'>
-                  {popupContent[`${marker.lat}, ${marker.lon}`] || "Chargement..."}
+                  {popupContent[`${marker.lat}, ${marker.lon}`] ||
+                    'Chargement...'}
                   <button
                     type='button'
                     id='chose'
@@ -132,8 +136,8 @@ function App () {
             </Marker>
           )
         })}
-        <Overlay title={title} address={address}></Overlay>
       </MapContainer>
+      <Overlay title={title} address={address}></Overlay>
     </>
   )
 }
