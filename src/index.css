@@ -54,7 +54,7 @@ body,
   padding: 3px 4px;
   border: none;
   border-radius: 5px;
-  margin-left: 5px;
+  margin: 0 5px;
   cursor: pointer;
   width: 30px;
   height: 30px;
@@ -62,6 +62,11 @@ body,
 #searchBar button svg {
   filter: invert(1);
   width: 100%;
+}
+#searchBar section:nth-of-type(1) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 #searchBar section:last-child {
   display: flex;
@@ -90,6 +95,45 @@ body,
   color: #242424;
   padding: 5px;
   margin-bottom: 5px;
+}
+
+#overlay {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  text-align: center;
+  background-color: aliceblue;
+  color: black;
+  border: 1px solid black;
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
+  border-bottom: none;
+  padding: 5px 0;
+  width: clamp(100px, 90vw, 500px);
+}
+@media (max-width: 576px) {
+  #overlay {
+    width: clamp(100px, 70vw, 500px);
+  }
+}
+
+#chose,
+#continue {
+  background-color: rgb(219, 219, 55);
+  padding: 5px;
+  font-weight: bold;
+  color: black;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+#popupContent {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 /*# sourceMappingURL=index.css.map */
