@@ -17,7 +17,6 @@ function App () {
 
   useEffect(() => {
     const abortController = new AbortController()
-
     const getRestaurants = async () => {
       try {
         setIsLoading(true)
@@ -32,14 +31,20 @@ function App () {
           throw new Error('Ville introuvable!')
         } else {
           const response = await restaurants.json()
-          const restaurantsList = response.elements
-          const markersList = restaurantsList.map(restaurant => ({
-            id: restaurant.id,
-            lat: restaurant.lat ?? restaurant.center?.lat,
-            lon: restaurant.lon ?? restaurant.center?.lon
-          }))
-          setMarkerData(markersList)
-          setIsLoading(false)
+          if (!response.results) {
+            throw new Error('Structure de la réponse API invalide')
+          } else {
+            const restaurantsList = response.results
+            const markersList = restaurantsList.map(restaurant => ({
+              // id: restaurant.place_id || `id-${restaurant.reference || Math.random()}`,
+              // lat: restaurant.lat ?? restaurant.center?.lat,
+              // lon: restaurant.lon ?? restaurant.center?.lon
+              lat: restaurant.geometry?.location?.lat,
+              lon: restaurant.geometry?.location?.lng
+            }))
+            setMarkerData(markersList)
+            setIsLoading(false)
+          }
         }
       } catch (err) {
         if (err.name === 'AbortError') {
