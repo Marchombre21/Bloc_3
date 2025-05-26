@@ -31,16 +31,20 @@ function App () {
           throw new Error('Ville introuvable!')
         } else {
           const response = await restaurants.json()
-          const restaurantsList = response.results
-          const markersList = restaurantsList.map(restaurant => ({
-            id: restaurant.place_id,
-            // lat: restaurant.lat ?? restaurant.center?.lat,
-            // lon: restaurant.lon ?? restaurant.center?.lon
-            lat: restaurant.geometry.location.lat,
-            lon: restaurant.geometry.location.lng
-          }))
-          setMarkerData(markersList)
-          setIsLoading(false)
+          if (!response.results) {
+            throw new Error('Structure de la réponse API invalide')
+          } else {
+            const restaurantsList = response.results
+            const markersList = restaurantsList.map(restaurant => ({
+              // id: restaurant.place_id || `id-${restaurant.reference || Math.random()}`,
+              // lat: restaurant.lat ?? restaurant.center?.lat,
+              // lon: restaurant.lon ?? restaurant.center?.lon
+              lat: restaurant.geometry?.location?.lat,
+              lon: restaurant.geometry?.location?.lng
+            }))
+            setMarkerData(markersList)
+            setIsLoading(false)
+          }
         }
       } catch (err) {
         if (err.name === 'AbortError') {
