@@ -17,7 +17,6 @@ function App () {
 
   useEffect(() => {
     const abortController = new AbortController()
-
     const getRestaurants = async () => {
       try {
         setIsLoading(true)
@@ -32,11 +31,13 @@ function App () {
           throw new Error('Ville introuvable!')
         } else {
           const response = await restaurants.json()
-          const restaurantsList = response.elements
+          const restaurantsList = response.results
           const markersList = restaurantsList.map(restaurant => ({
-            id: restaurant.id,
-            lat: restaurant.lat ?? restaurant.center?.lat,
-            lon: restaurant.lon ?? restaurant.center?.lon
+            id: restaurant.place_id,
+            // lat: restaurant.lat ?? restaurant.center?.lat,
+            // lon: restaurant.lon ?? restaurant.center?.lon
+            lat: restaurant.geometry.location.lat,
+            lon: restaurant.geometry.location.lng
           }))
           setMarkerData(markersList)
           setIsLoading(false)
