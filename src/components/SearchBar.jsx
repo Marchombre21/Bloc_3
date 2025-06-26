@@ -1,24 +1,26 @@
-import React, { useRef, useState } from 'react'
+import React, { useState } from 'react'
 import { FaSearchLocation } from 'react-icons/fa'
 import CityButtons from './CityButtons'
 import { ClipLoader } from 'react-spinners'
 
-const SearchBar = ({
-  onPositionChange,
-  isLoading,
-  onRadiusChange,
-  radius
-}) => {
+const SearchBar = ({ onPositionChange, isLoading, onRadiusChange, radius }) => {
   const [inputValue, setInputValue] = useState('')
   const [results, setResults] = useState([])
 
   const getList = async city => {
-    const location = await fetch(`/api.php?city=${city}`)
+    //Obligé de passer par une api, nominatim n'accepte pas les requêtes directement depuis un navigateur.
+    const location = await fetch(`${import.meta.env.VITE_APP_URL}?city=${city}`)
     if (!location.ok) {
       throw new Error('Ville introuvable!')
     } else {
       const listLocations = await location.json()
-      getResults(listLocations)
+      if (listLocations.errorName) {
+        alert(
+          'Aucune ville trouvée sous ce nom. Pensez à ne mettre que le nom de la ville, pas de code postal ni de région.'
+        )
+      } else {
+        getResults(listLocations)
+      }
     }
   }
 
@@ -70,7 +72,7 @@ const SearchBar = ({
         <button onClick={() => getList(inputValue)} type='button'>
           <FaSearchLocation></FaSearchLocation>
         </button>
-        <ClipLoader loading={isLoading} size={25}/>
+        <ClipLoader loading={isLoading} size={25} />
       </section>
       <section>
         <label htmlFor='radius'>Zone de recherche: </label>

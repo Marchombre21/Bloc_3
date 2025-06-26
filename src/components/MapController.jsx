@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect } from 'react'
 import { useMap } from 'react-leaflet'
 
 const MapController = ({ position }) => {
