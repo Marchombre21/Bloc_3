@@ -20,6 +20,7 @@ function App () {
 
   const getAllResults = async (token, signalController, markers) => {
     setIsLoading(true)
+    //Juste là pour attendre deux secondes avant la requête suivante car l'api de google demande au moins ça entre deux requêtes.
     await new Promise(resolve => setTimeout(resolve, 2000)) 
     const nextPage = await fetch(
       `${import.meta.env.VITE_APP_URL}?token=${token}`,
