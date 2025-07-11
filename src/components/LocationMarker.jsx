@@ -6,6 +6,7 @@ const LocationMarker = ({ changePosition }) => {
   const map = useMap()
 
   useEffect(() => {
+    //Demande à l'utilisateur puis lance la geolocalisation.
     map.locate()
 
     const onLocationFound = e => {
@@ -16,7 +17,8 @@ const LocationMarker = ({ changePosition }) => {
       alert('Il y a eu un soucis pendant votre géolocalisation.')
       console.error(e.message)
     }
-
+// map.on = addeventlistener en js. Quand la geolocalisation est finie, soit leaflet lance un "locationfound" en cas de réussite soit un "locationerror" en cas d'échec.
+// Ce qui lancera la fonction associée.
     map.on('locationfound', onLocationFound)
     map.on('locationerror', onLocationError)
 

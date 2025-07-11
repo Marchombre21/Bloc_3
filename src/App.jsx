@@ -1,4 +1,4 @@
-import { MapContainer, TileLayer, useMap, useMapEvent } from 'react-leaflet'
+import { MapContainer, TileLayer } from 'react-leaflet'
 import { Marker, Popup } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 import React, { useEffect, useState } from 'react'
@@ -21,36 +21,41 @@ function App () {
   const getAllResults = async (token, signalController, markers) => {
     setIsLoading(true)
     //Juste là pour attendre deux secondes avant la requête suivante car l'api de google demande au moins ça entre deux requêtes.
-    await new Promise(resolve => setTimeout(resolve, 2000)) 
-    const nextPage = await fetch(
-      `${import.meta.env.VITE_APP_URL}?token=${token}`,
-      {
-        signal: signalController
-      }
-    )
-    if (!nextPage.ok) {
-      setIsLoading(false)
-      throw new Error('Ville introuvable!')
-    } else {
-      const response = await nextPage.json()
-      if (!response.results) {
-        throw new Error('Structure de la réponse API invalide')
+    await new Promise(resolve => setTimeout(resolve, 2000))
+    try {
+      const nextPage = await fetch(
+        `${import.meta.env.VITE_APP_URL}?token=${token}`,
+        {
+          signal: signalController
+        }
+      )
+      if (!nextPage.ok) {
+        setIsLoading(false)
+        throw new Error('Ville introuvable!')
       } else {
-        const restaurantsListNext = response.results
-        markers = [
-          ...markers,
-          ...restaurantsListNext.map(restaurant => ({
-            lat: restaurant.geometry?.location?.lat,
-            lon: restaurant.geometry?.location?.lng
-          }))
-        ]
-        if (response.next_page_token) {
-          getAllResults(response.next_page_token, signalController, markers)
+        const response = await nextPage.json()
+        if (!response.results) {
+          throw new Error('Structure de la réponse API invalide')
         } else {
-          setMarkerData(markers)
-          setIsLoading(false)
+          const restaurantsListNext = response.results
+          markers = [
+            ...markers,
+            ...restaurantsListNext.map(restaurant => ({
+              lat: restaurant.geometry?.location?.lat,
+              lon: restaurant.geometry?.location?.lng
+            }))
+          ]
+          if (response.next_page_token) {
+            getAllResults(response.next_page_token, signalController, markers)
+          } else {
+            setMarkerData(markers)
+            setIsLoading(false)
+          }
         }
       }
+    } catch (err) {
+      console.error(err.message)
+      setIsLoading(false)
     }
   }
 
@@ -82,7 +87,11 @@ function App () {
             }))
 
             if (response.next_page_token) {
-              getAllResults(response.next_page_token, abortController.signal, markersList)
+              getAllResults(
+                response.next_page_token,
+                abortController.signal,
+                markersList
+              )
             } else {
               setMarkerData(markersList)
               setIsLoading(false)
@@ -101,6 +110,9 @@ function App () {
     getRestaurants()
     setTitle('Aucun restaurant sélectionné')
     setAddress('')
+    //Le return dans un useEffect n'a pas le même comportement que dans les autres langages. Il ne sert pas à arrêter une fonction et renvoyer un résultat.
+    //Il effectue son code au moment du démontage du composant ou d'une mise à jour.
+    //Il sert à nettoyer un effet précédent et, au tout premier montage, il n’y a pas encore d’effet à nettoyer donc il ne s'exécute pas.
     return () => {
       abortController.abort()
     }
