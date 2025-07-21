@@ -11,7 +11,6 @@ const LocationMarker = ({ changePosition }) => {
 
     const onLocationFound = e => {
       changePosition([e.latlng?.lat, e.latlng?.lng])
-      map.flyTo([e.latlng?.lat, e.latlng?.lng], map.getZoom())
     }
     const onLocationError = e => {
       alert('Il y a eu un soucis pendant votre géolocalisation.')

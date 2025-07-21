@@ -54,8 +54,11 @@ function App () {
         }
       }
     } catch (err) {
-      console.error(err.message)
-      setIsLoading(false)
+      if (err.name === 'AbortError') {
+      } else {
+        console.error(err.message)
+        setIsLoading(false)
+      }
     }
   }
 
@@ -73,7 +76,6 @@ function App () {
           }
         )
         if (!restaurants.ok) {
-          setIsLoading(false)
           throw new Error('Ville introuvable!')
         } else {
           const response = await restaurants.json()
@@ -114,7 +116,7 @@ function App () {
     //Il effectue son code au moment du démontage du composant ou d'une mise à jour.
     //Il sert à nettoyer un effet précédent et, au tout premier montage, il n’y a pas encore d’effet à nettoyer donc il ne s'exécute pas.
     return () => {
-      abortController.abort()
+      abortController.abort('Nouvelle requête effectuée.')
     }
   }, [radius, position])
 
@@ -152,6 +154,12 @@ function App () {
     }
   }
 
+  const handleMarkers = (lat, lon) => {
+    if (!popupContent[`${lat}, ${lon}`]) {
+      getAddress(lat, lon)
+    }
+  }
+
   return (
     <>
       <SearchBar
@@ -170,7 +178,7 @@ function App () {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
         />
-        <PopupCloser trigger={`${radius}-${position}`}></PopupCloser>
+        <PopupCloser trigger={`${radius}, ${position}`}></PopupCloser>
         <MapController position={position}></MapController>
         <LocationMarker changePosition={setPosition}></LocationMarker>
         {markerData.map(marker => {
@@ -178,7 +186,7 @@ function App () {
             <Marker
               key={`${marker.lat}-${marker.lon}`}
               eventHandlers={{
-                click: () => getAddress(marker.lat, marker.lon)
+                click: () => handleMarkers(marker.lat, marker.lon)
               }}
               position={[marker.lat, marker.lon]}
             >
